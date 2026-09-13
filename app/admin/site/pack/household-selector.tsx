@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import CountUp from "./count-up";
+import DryGauge from "./dry-gauge";
 import { CUPBOARD_LITRES, DAYS, KCAL_PER_PERSON_DAY, PEOPLE_OPTIONS } from "@/lib/pack-funnel";
 import { useHousehold } from "./household-context";
 
@@ -70,29 +72,47 @@ export default function HouseholdSelector() {
       </div>
 
       <div className="sf-hhout">
-        <div className="sf-hhcard alarm">
+        {/* The arc is the argument: its length IS hours ÷ 72, so the gap between
+            the sweep and the full ring is the shortfall drawn to scale. */}
+        <div className="sf-hhcard alarm gauge">
           <span className="sf-hhk">Without this, you run dry at</span>
-          <strong>{numbers.dryHours} hours</strong>
-          <span className="sf-hhsub">Well short of the {DAYS * 24} your government asks for.</span>
+          <DryGauge hours={numbers.dryHours} target={DAYS * 24} />
+          <span className="sf-hhsub">
+            Against the {DAYS * 24} your government asks for — the unfilled part of that ring is the
+            gap.
+          </span>
         </div>
         <div className="sf-hhcard">
           <span className="sf-hhk">Water you need</span>
-          <strong>{numbers.waterLitres} litres</strong>
+          <strong>
+            <CountUp value={numbers.waterLitres} decimals={numbers.waterLitres % 1 ? 1 : 0} /> litres
+          </strong>
           <span className="sf-hhsub">
             {numbers.litresPerPersonDay} L per person per day, for {DAYS} days.
           </span>
         </div>
         <div className="sf-hhcard">
           <span className="sf-hhk">Food you need</span>
-          <strong>{numbers.foodKcal.toLocaleString("en-GB")} kcal</strong>
+          <strong>
+            <CountUp value={numbers.foodKcal} /> kcal
+          </strong>
           <span className="sf-hhsub">
             {KCAL_PER_PERSON_DAY.toLocaleString("en-GB")} kcal per person per day. No cooking, because
             there may be no power.
           </span>
         </div>
-        <div className="sf-hhcard">
+        <div className="sf-hhcard packs">
           <span className="sf-hhk">Packs for your household</span>
-          <strong>{numbers.packs}</strong>
+          <strong>
+            <CountUp value={numbers.packs} />
+          </strong>
+          {/* One box per two people, drawn. Four boxes is more immediate than
+              the numeral 2 and it is the same fact. */}
+          <div className="sf-hhboxes" aria-hidden="true">
+            {Array.from({ length: Math.min(numbers.packs, 10) }).map((_, i) => (
+              <span key={i} style={{ animationDelay: `${i * 70}ms` }} />
+            ))}
+          </div>
           <span className="sf-hhsub">Each pack covers two people for the full three days.</span>
         </div>
       </div>

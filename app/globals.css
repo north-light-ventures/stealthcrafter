@@ -6564,3 +6564,135 @@ a.sf-pkcartile:hover { box-shadow: var(--sf-lift-2); transform: translateY(-2px)
 .sf-aftersteps em { color: var(--sc-bad); font-style: normal; }
 
 .sf-pktop.solo { grid-template-columns: 1fr; margin-bottom: 20px; }
+
+/* ============================================================================
+   MOTION — the graphical pass on the pack funnel.
+
+   One rule throughout: motion carries information or it does not ship. A bar
+   that grows to 24 of 72 hours IS the shortfall; an arc whose length is
+   hours ÷ 72 IS the gap; a number that counts from 24 to 12 shows you it
+   halved. Nothing here animates to be lively.
+
+   Every effect is wrapped in prefers-reduced-motion: no-preference, and the
+   scroll-driven ones sit behind @supports with the animation-range check —
+   partial support is worse than none. Firefox has no scroll-driven animations,
+   so these are progressive enhancement: without them the page renders in its
+   final state, which is the correct fallback for something decorative.
+   ========================================================================= */
+
+.sf-count { display: inline-block; }
+
+/* ---------- the depletion arc ---------- */
+.sf-hhcard.gauge { align-items: center; text-align: center; }
+.sf-gauge { width: 122px; height: 122px; margin: 2px auto 4px; display: block; }
+.sf-gaugetrack { fill: none; stroke: rgba(213,94,0,.16); stroke-width: 11; }
+.sf-gaugearc {
+  fill: none; stroke: var(--sc-bad); stroke-width: 11; stroke-linecap: round;
+  /* Start at twelve o'clock and sweep clockwise, like a clock, because that is
+     what the number means. */
+  transform: rotate(-90deg); transform-origin: 64px 64px;
+  transition: stroke-dashoffset 1.1s cubic-bezier(.22,.8,.28,1);
+}
+@media (prefers-reduced-motion: reduce) { .sf-gaugearc { transition: none; } }
+.sf-gaugenum { fill: var(--sc-bad); font-size: 31px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.sf-gaugelab { fill: var(--sc-fg-4); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; }
+
+/* ---------- one box per two people ---------- */
+.sf-hhboxes { display: flex; gap: 4px; margin: 6px 0 2px; flex-wrap: wrap; }
+.sf-hhboxes span {
+  width: 15px; height: 12px; border-radius: 2px;
+  background: var(--sc-brass); box-shadow: inset 0 -3px 0 rgba(0,0,0,.16);
+}
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes sf-boxin { from { opacity: 0; transform: translateY(-5px) scale(.7); } }
+  .sf-hhboxes span { animation: sf-boxin .34s cubic-bezier(.2,.9,.3,1) backwards; }
+}
+
+/* ---------- coverage as a real 0-72 hour scale ---------- */
+.sf-pkcovaxis {
+  display: flex; justify-content: space-between;
+  max-width: 100%; margin: 0 0 8px; padding: 0 2px;
+  font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--sc-fg-5);
+}
+.sf-pkcovtrack { position: relative; }
+.sf-pkcovtick {
+  position: absolute; top: 0; bottom: 0; width: 1px;
+  background: rgba(255,255,255,.55); z-index: 1;
+}
+.sf-pkcovhrs {
+  font-size: 13px; font-weight: 700; color: var(--sc-fg);
+  font-variant-numeric: tabular-nums; margin-right: 8px;
+}
+.sf-pkcovfill { transform-origin: left center; }
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports ((animation-timeline: view()) and (animation-range: entry)) {
+    @keyframes sf-fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+    .sf-pkcovfill:not(.nofill) {
+      animation: sf-fill 1s cubic-bezier(.22,.8,.28,1) both;
+      /* Declared AFTER the shorthand, or the shorthand resets it. */
+      animation-timeline: view();
+      animation-range: entry 10% cover 32%;
+    }
+  }
+}
+
+/* ---------- section reveals ---------- */
+/* Transform and opacity only — both run on the compositor. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports ((animation-timeline: view()) and (animation-range: entry)) {
+    @keyframes sf-rise { from { opacity: 0; transform: translateY(22px); } }
+    .sf-reveal {
+      animation: sf-rise .8s ease-out both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 22%;
+    }
+  }
+}
+
+/* ---------- carousel tiles arrive as they scroll in ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  @supports ((animation-timeline: view()) and (animation-range: entry)) {
+    @keyframes sf-tilein { from { opacity: .25; transform: scale(.93); } }
+    .sf-pkcartile {
+      animation: sf-tilein linear both;
+      /* Horizontal scroller, so track the inline axis explicitly. */
+      animation-timeline: view(inline);
+      animation-range: entry 0% entry 85%;
+    }
+  }
+}
+
+/* ---------- the live bar, and the big live count ---------- */
+.sf-livebar { position: relative; overflow: hidden; }
+@media (prefers-reduced-motion: no-preference) {
+  /* A single slow sweep of light. Not a countdown, not a pulse suggesting
+     something is about to happen — the number underneath is already true and
+     does not need dressing. */
+  @keyframes sf-sweep { from { transform: translateX(-100%); } to { transform: translateX(200%); } }
+  .sf-livebar::after {
+    content: ""; position: absolute; inset: 0 auto 0 0; width: 34%;
+    background: linear-gradient(90deg, transparent, rgba(217,194,136,.14), transparent);
+    animation: sf-sweep 7s linear infinite;
+    pointer-events: none;
+  }
+}
+.sf-cbllive strong { transition: color .3s ease; }
+
+/* ---------- order block: the button earns a little weight ---------- */
+.sf-cta { transition: transform .16s ease, filter .16s ease, box-shadow .16s ease; }
+.sf-cta:hover:not(:disabled) { transform: translateY(-1px); }
+.sf-cta:active:not(:disabled) { transform: translateY(0); }
+
+/* ---------- household chips ---------- */
+.sf-hhchips button { transition: transform .14s ease, background .14s ease, border-color .14s ease; }
+.sf-hhchips button:active { transform: scale(.94); }
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes sf-pop { 50% { transform: scale(1.07); } }
+  .sf-hhchips button.on { animation: sf-pop .26s ease-out; }
+}
+
+/* Cards lift very slightly as the numbers inside them change, so a value that
+   moved is noticed without a flash or a colour change. */
+.sf-hhcard { transition: box-shadow .3s ease, transform .3s ease; }
+.sf-hhcard:hover { box-shadow: var(--sf-lift-1); }

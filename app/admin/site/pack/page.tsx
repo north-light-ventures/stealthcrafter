@@ -54,19 +54,24 @@ function CoverageBar({ row }: { row: CoverageRow }) {
       <div className="sf-pkcovhead">
         <span className="sf-pkcovneed">{row.need}</span>
         <span className="sf-pkcovstate">
+          {row.hours !== null ? <b className="sf-pkcovhrs">{Math.round(row.hours)} h</b> : null}
           <span className="g" aria-hidden="true">{c.glyph}</span>
           {c.label}
         </span>
       </div>
+      {/* A real 0-72 hour scale with the day marks drawn on it, so a bar that
+          stops at 24 is visibly one third rather than just short. The fill
+          animates with transform, never width — width animation is a layout
+          thrash and the guidance is explicit about it. */}
       <div className="sf-pkcovtrack" role="img" aria-label={`${row.need}: ${c.label}. ${row.headline}`}>
+        <span className="sf-pkcovtick" style={{ left: "33.333%" }} aria-hidden="true" />
+        <span className="sf-pkcovtick" style={{ left: "66.666%" }} aria-hidden="true" />
         {pct === null ? (
           <div className="sf-pkcovfill nofill">
             <span>no measurable figure</span>
           </div>
         ) : (
-          <div className="sf-pkcovfill" style={{ width: `${pct}%` }}>
-            <span>{Math.round(row.hours!)} h</span>
-          </div>
+          <div className="sf-pkcovfill" style={{ width: `${pct}%` }} />
         )}
       </div>
       <p className="sf-pkcovhead2">{row.headline}</p>
@@ -166,7 +171,7 @@ export default async function PackPage() {
         </section>
 
         {/* Each objection sits where it forms, not in a FAQ at the bottom. */}
-        <section className="sf-obj">
+        <section className="sf-reveal sf-obj">
           <h2>Three things people say before they buy</h2>
 
           <div className="sf-objitem">
@@ -248,13 +253,17 @@ export default async function PackPage() {
           </div>
         </div>
 
-        <section className="sf-pkcovgrid">
+        <div className="sf-pkcovaxis" aria-hidden="true">
+          <span>0 h</span><span>24 h</span><span>48 h</span><span>72 h</span>
+        </div>
+
+        <section className="sf-reveal sf-pkcovgrid">
           {data.coverage.map((row) => (
             <CoverageBar key={row.key} row={row} />
           ))}
         </section>
 
-        <section className="sf-pkmanifest">
+        <section className="sf-reveal sf-pkmanifest">
           <h2>The manifest</h2>
           <p className="sf-pklede">
             {s.filled} filled lines and {s.unfilled} still empty, published together. Every line
@@ -312,7 +321,7 @@ export default async function PackPage() {
           ))}
         </section>
 
-        <section className="sf-pkrules">
+        <section className="sf-reveal sf-pkrules">
           <h2>What is deliberately not in this box</h2>
           <div className="sf-pkrulegrid">
             <div>
@@ -353,7 +362,7 @@ export default async function PackPage() {
 
         <LeadCapture />
 
-        <section className="sf-after">
+        <section className="sf-reveal sf-after">
           <h2>What happens after you order</h2>
           <p className="sf-pklede">
             A box you buy once and forget is a box that fails. This is the part that stops that —
