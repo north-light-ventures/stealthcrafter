@@ -6696,3 +6696,283 @@ a.sf-pkcartile:hover { box-shadow: var(--sf-lift-2); transform: translateY(-2px)
    moved is noticed without a flash or a colour change. */
 .sf-hhcard { transition: box-shadow .3s ease, transform .3s ease; }
 .sf-hhcard:hover { box-shadow: var(--sf-lift-1); }
+
+/* ============================================================
+   THE PACK PAGE, MADE GRAPHICAL
+   The brief was "it looks super boring", and it was right: a page
+   selling a physical box opened with three paragraphs and put its
+   seventeen photographs below the fold, then ran as one white
+   column for four thousand pixels. Three things fix that — show
+   the goods first, set the figures large, and change the ground
+   under the reader.
+   ============================================================ */
+
+/* ---------- full-bleed banding ----------
+   Same breakout arithmetic as .sf-band. .sf-page already sets
+   overflow-x: clip, which is what keeps 100vw from producing a
+   horizontal scrollbar next to a visible gutter. */
+.sf-bleed {
+  margin-inline: calc(50% - 50vw);
+  padding-inline: calc(50vw - 50% + 24px);
+  margin-block: 34px;
+}
+.sf-bleed > * { max-width: 1240px; margin-inline: auto; }
+
+.sf-bleed.tint {
+  padding-block: 46px;
+  background:
+    radial-gradient(900px 320px at 12% 0%, rgba(185,151,91,.10), transparent 62%),
+    linear-gradient(180deg, #eef1f5, #e3e8ee);
+  border-block: 1px solid var(--sc-line-soft);
+}
+.sf-bleed.ink {
+  padding-block: 50px;
+  color: var(--sf-onink);
+  background:
+    radial-gradient(1000px 380px at 15% -20%, rgba(226,199,146,.14), transparent 62%),
+    radial-gradient(800px 340px at 88% 118%, rgba(0,114,178,.18), transparent 60%),
+    linear-gradient(178deg, var(--sf-ink), var(--sf-ink-2));
+}
+.sf-bleed.ink h2, .sf-bleed.ink h3, .sf-bleed.ink strong { color: var(--sf-onink); }
+.sf-bleed.ink p, .sf-bleed.ink li { color: var(--sf-onink-2); }
+
+/* ---------- the hero ---------- */
+.sf-pkhero {
+  position: relative;
+  margin: 0 calc(50% - 50vw) 34px;
+  padding: 48px calc(50vw - 50% + 22px) 46px;
+  background:
+    radial-gradient(1200px 460px at 14% -26%, rgba(226,199,146,.18), transparent 62%),
+    radial-gradient(900px 420px at 94% 122%, rgba(0,114,178,.22), transparent 60%),
+    linear-gradient(178deg, var(--sf-ink), var(--sf-ink-2));
+  color: var(--sf-onink);
+  overflow: hidden;
+}
+.sf-pkhero::after {
+  content: "";
+  position: absolute; left: 0; right: 0; bottom: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(226,199,146,.55), transparent);
+}
+.sf-pkheroin {
+  max-width: 1240px; margin: 0 auto;
+  display: grid; gap: 40px;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  align-items: center;
+}
+.sf-pkherocopy { min-width: 0; }
+.sf-pkherocopy h1 {
+  margin: 0 0 14px;
+  font-size: clamp(30px, 4.1vw, 50px);
+  line-height: 1.06;
+  letter-spacing: -0.022em;
+  font-weight: 650;
+  max-width: 15ch;
+  color: var(--sf-onink);
+}
+.sf-pkherolede {
+  margin: 0 0 24px; max-width: 54ch;
+  font-size: 15px; line-height: 1.68; color: var(--sf-onink-2);
+}
+
+/* The buy control, restyled for the dark ground. It is the same
+   component as the order block; only the surface changes. */
+.sf-pkherobuy { max-width: 420px; }
+.sf-pkbuy.hero {
+  padding: 18px 20px 16px;
+  border-radius: var(--sf-radius);
+  background: rgba(255,255,255,.055);
+  border: 1px solid rgba(255,255,255,.14);
+  backdrop-filter: blur(6px);
+}
+.sf-pkbuy.hero .sf-pkprice strong { color: var(--sf-onink); }
+.sf-pkbuy.hero .sf-pkqtylabel,
+.sf-pkbuy.hero .sf-pkqtyhint,
+.sf-pkbuy.hero .sf-pkeach { color: var(--sf-onink-3); }
+.sf-pkbuy.hero .sf-pkqtyhint em { color: var(--sf-brass-lite); font-style: normal; }
+.sf-pkbuy.hero .sf-pkqty button {
+  background: rgba(255,255,255,.09);
+  border-color: rgba(255,255,255,.2);
+  color: var(--sf-onink);
+}
+.sf-pkbuy.hero .sf-pkqty button:hover:not(:disabled) { background: rgba(255,255,255,.17); }
+.sf-pkbuy.hero .sf-pkqty span { color: var(--sf-onink); }
+.sf-pkbuy.hero .sf-pktest {
+  background: rgba(226,199,146,.16); color: var(--sf-brass-lite);
+  border: 1px solid rgba(226,199,146,.32);
+}
+.sf-pkherojump {
+  display: inline-block; margin-top: 12px;
+  font-size: 12.5px; color: var(--sf-brass-lite); text-decoration: none;
+  border-bottom: 1px solid rgba(226,199,146,.36);
+}
+.sf-pkherojump:hover { border-bottom-color: var(--sf-brass-lite); }
+
+.sf-pkherochips {
+  list-style: none; margin: 22px 0 0; padding: 18px 0 0;
+  border-top: 1px solid rgba(255,255,255,.12);
+  display: grid; gap: 12px 22px;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+.sf-pkherochips li {
+  font-size: 11.5px; letter-spacing: .04em; color: var(--sf-onink-3);
+  display: flex; align-items: baseline; gap: 7px;
+}
+.sf-pkherochips b {
+  font-size: 17px; font-weight: 650; letter-spacing: -.01em;
+  color: var(--sf-brass-lite); font-variant-numeric: tabular-nums;
+}
+
+/* ---------- the mosaic ----------
+   Nine catalogue photographs, one of them twice the size. An
+   asymmetric grid rather than a neat 3x3, because a neat grid of
+   product cut-outs reads as a spreadsheet. */
+.sf-pkheroart { position: relative; min-width: 0; margin-right: 26px; }
+.sf-pkmosaic {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.sf-pkmostile {
+  margin: 0; position: relative; overflow: hidden;
+  border-radius: 10px;
+  background: linear-gradient(168deg, rgba(255,255,255,.94), rgba(232,238,245,.88));
+  border: 1px solid rgba(255,255,255,.18);
+  box-shadow: 0 1px 2px rgba(0,0,0,.28), 0 10px 24px rgba(0,0,0,.22);
+  aspect-ratio: 1 / 1;
+}
+.sf-pkmostile:first-child { grid-column: span 2; grid-row: span 2; }
+.sf-pkmostile img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: contain;
+  padding: 9%;
+}
+.sf-pkmostile:first-child img { padding: 11%; }
+
+/* The stamp is the one piece of pure graphic on the page and it
+   states the only number the whole product is about. */
+.sf-pkherostamp {
+  position: absolute; right: -26px; bottom: -26px;
+  width: 108px; height: 108px; border-radius: 50%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: radial-gradient(circle at 40% 30%, #f0dcb2, var(--sc-brass-2) 70%);
+  color: #2a1f08;
+  box-shadow: 0 3px 8px rgba(0,0,0,.32), 0 16px 34px rgba(0,0,0,.3);
+  border: 2px solid rgba(255,255,255,.42);
+}
+.sf-pkherostamp b {
+  font-size: 40px; line-height: 1; font-weight: 700; letter-spacing: -.03em;
+  font-variant-numeric: tabular-nums;
+}
+.sf-pkherostamp span {
+  font-size: 9.5px; letter-spacing: .24em; text-transform: uppercase;
+  margin-top: 3px; opacity: .8;
+}
+
+@media (max-width: 980px) {
+  .sf-pkheroin { grid-template-columns: 1fr; gap: 30px; }
+  .sf-pkherocopy h1 { max-width: none; }
+  .sf-pkheroart { order: -1; }
+  .sf-pkherostamp { width: 86px; height: 86px; right: -12px; bottom: -14px; }
+  .sf-pkherostamp b { font-size: 31px; }
+  .sf-pkherobuy { max-width: none; }
+}
+@media (max-width: 560px) {
+  .sf-pkhero { padding-top: 32px; padding-bottom: 34px; }
+  .sf-pkmosaic { grid-template-columns: repeat(3, 1fr); }
+  .sf-pkmostile:nth-child(n + 7) { display: none; }
+}
+
+/* ---------- the four figures ---------- */
+.sf-pkfigsbleed { margin-block: 0 34px; }
+.sf-pkfigs {
+  display: grid; gap: 26px 34px;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+.sf-pkfig { min-width: 0; }
+.sf-pkfig b {
+  display: block;
+  font-size: clamp(44px, 5.4vw, 68px); line-height: .92; font-weight: 650;
+  letter-spacing: -.035em; color: var(--sf-brass-lite);
+  font-variant-numeric: tabular-nums;
+}
+.sf-pkfig span {
+  display: block; margin: 10px 0 8px;
+  font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--sf-onink);
+}
+.sf-pkfig em {
+  display: block; font-style: normal;
+  font-size: 12.5px; line-height: 1.6; color: var(--sf-onink-3);
+}
+
+.sf-pkanchor { scroll-margin-top: 20px; }
+
+/* ---------- "deliberately not in this box", on the dark ground ---------- */
+.sf-bleed.ink .sf-pkrulegrid > div {
+  background: rgba(255,255,255,.045);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: var(--sf-radius);
+  padding: 20px 20px 18px;
+}
+.sf-bleed.ink .sf-pkrulegrid h3 { margin-top: 12px; }
+
+/* A prohibition ring with the thing named inside it — drawn, so it
+   never depends on a glyph font being present, and it carries the
+   word as well as the shape. */
+.sf-pkruleno {
+  display: inline-flex; align-items: center; justify-content: center;
+  position: relative;
+  width: 52px; height: 52px; border-radius: 50%;
+  border: 2px solid rgba(226,199,146,.55);
+  color: var(--sf-brass-lite);
+  font-size: 9px; letter-spacing: .1em; font-weight: 700;
+  background: rgba(226,199,146,.08);
+}
+.sf-pkruleno::after {
+  content: "";
+  position: absolute; left: 50%; top: 50%;
+  width: 60px; height: 2px; border-radius: 2px;
+  background: rgba(226,199,146,.55);
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+/* ---------- the objection comparison, given some shape ---------- */
+.sf-objcmp > div {
+  border-radius: var(--sf-radius);
+  padding: 16px 17px 15px;
+  background: rgba(255,255,255,.62);
+  border: 1px solid var(--sc-line-soft);
+}
+.sf-objcmp > div.win {
+  background: linear-gradient(180deg, #fffdf7, var(--sc-brass-soft));
+  border-color: var(--sc-brass-line);
+  box-shadow: var(--sf-lift-2);
+}
+.sf-objcmp > div.win strong { color: var(--sc-brass-3); }
+
+/* ---------- motion for the new pieces ----------
+   Same contract as the rest of the page: transform and opacity only,
+   never without a reduced-motion check, and never hiding content that
+   the animation is required to bring back. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports ((animation-timeline: view()) and (animation-range: entry)) {
+    .sf-pkmostile {
+      animation: sf-rise both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 55%;
+    }
+    .sf-pkfig {
+      animation: sf-rise both;
+      animation-timeline: view();
+      animation-range: entry 5% entry 60%;
+    }
+  }
+  /* The stamp lands once on load rather than on scroll — it is above
+     the fold, so a scroll timeline would never run for it. */
+  .sf-pkherostamp { animation: sf-stamp .62s cubic-bezier(.2,.9,.25,1.2) both .35s; }
+}
+@keyframes sf-stamp {
+  from { opacity: 0; transform: scale(.6) rotate(-14deg); }
+  to   { opacity: 1; transform: none; }
+}

@@ -127,6 +127,10 @@ export default async function PackPage() {
   }));
   const weightKg = s.totalWeightGrams ? (s.totalWeightGrams / 1000).toFixed(2) : null;
 
+  /* Nine real photographs for the hero. Filled lines only — an empty slot is
+     worth publishing in the manifest and worthless as a picture. */
+  const mosaic = carousel.filter((c) => c.image).slice(0, 9);
+
   return (
     <HouseholdProvider countries={funnel.countries}>
     <main className="sf-page banded">
@@ -138,19 +142,103 @@ export default async function PackPage() {
         </div>
       ) : null}
 
-      <header className="sf-band">
-        <div className="sf-bandin">
-          <div className="sf-bandkicker">One pack · Shelter in place · Three days</div>
-          <h1 className="wide">When the power goes, you have about a day.</h1>
-          <p className="sf-bandlede">
-            Not because anything dramatic happens. Because the water in your cupboard runs out, the
-            shops shut, and the card machines stop. Every civil-protection agency in Europe tells
-            households to cover seventy-two hours on their own. Almost nobody does.
-          </p>
+      {/* THE HERO SHOWS THE GOODS.
+          A page selling a physical box that opens with three paragraphs and no
+          photograph is a leaflet. The mosaic is nine of the real product
+          photographs from the catalogue — not a staged box shot we do not have
+          — and the price and the button sit beside them, above the fold, so the
+          page can be bought from its first screen. */}
+      <header className="sf-pkhero">
+        <div className="sf-pkheroin">
+          <div className="sf-pkherocopy">
+            <div className="sf-bandkicker">One pack · Shelter in place · Three days</div>
+            <h1>When the power goes, you have about a day.</h1>
+            <p className="sf-pkherolede">
+              Not because anything dramatic happens. Because the water in your cupboard runs out, the
+              shops shut, and the card machines stop. Every civil-protection agency in Europe tells
+              households to cover seventy-two hours on their own. Almost nobody does.
+            </p>
+
+            <div className="sf-pkherobuy">
+              <PackBuy
+                variant="hero"
+                productId={p.id}
+                price={p.selling}
+                currency="EUR"
+                isPlaceholder={data.priceIsPlaceholder}
+              />
+            </div>
+
+            <ul className="sf-pkherochips">
+              <li><b>{s.filled}</b> items, each evidenced</li>
+              <li><b>5 yr</b> shelf life</li>
+              <li><b>No</b> stove, fuel or gas</li>
+              <li><b>{weightKg ? `${weightKg} kg` : "Weighed"}</b> in one box</li>
+            </ul>
+          </div>
+
+          <div className="sf-pkheroart" aria-hidden="true">
+            <div className="sf-pkmosaic">
+              {mosaic.map((it, i) => (
+                <figure className="sf-pkmostile" key={it.key}>
+                  {/* One high-priority image — the LCP candidate — and no more.
+                      The rest load normally; they are all within the first
+                      screen so none of them is lazy. */}
+                  <img
+                    src={it.image as string}
+                    alt=""
+                    decoding="async"
+                    fetchPriority={i === 0 ? "high" : undefined}
+                  />
+                </figure>
+              ))}
+            </div>
+            <div className="sf-pkherostamp">
+              <b>72</b>
+              <span>hours</span>
+            </div>
+          </div>
         </div>
       </header>
 
       <div className="sf-catwrap">
+        {/* The goods come before the argument. Seventeen photographs of real
+            products answer "what am I buying" faster than any paragraph, and
+            the paragraphs are all still below. */}
+        <div id="whats-in-it" className="sf-pkanchor">
+          <PackCarousel items={carousel} />
+        </div>
+
+        {/* Four figures, full bleed and set large. The page had exactly one
+            number set at display size and it was in the internal block. */}
+        <div className="sf-bleed ink sf-pkfigsbleed">
+          <div className="sf-pkfigs">
+            <div className="sf-pkfig">
+              <b>72</b>
+              <span>hours covered</span>
+              <em>What every civil-protection agency in Europe asks a household to manage alone.</em>
+            </div>
+            <div className="sf-pkfig">
+              <b>{s.filled}</b>
+              <span>items, sourced</span>
+              <em>
+                Each one carries its brand, its origin, its certification and how far up our evidence
+                ladder it has climbed. {s.unfilled} slots are still empty and we publish those too.
+              </em>
+            </div>
+            <div className="sf-pkfig">
+              <b>5</b>
+              <span>year life</span>
+              <em>Rations made for liferafts, not supermarket food you rotate yearly and then forget.</em>
+            </div>
+            <div className="sf-pkfig">
+              <b>0</b>
+              <span>restricted items</span>
+              <em>No stove, no fuel, no gas, no lighter — so it travels as an ordinary parcel, anywhere in Europe.</em>
+            </div>
+          </div>
+        </div>
+
         {/* THE SELECTOR IS THE CONVERSION MECHANISM and it sits above the fold.
             Everything below it is personalised by what it says, including the
             quantity that reaches the real basket. */}
@@ -170,7 +258,10 @@ export default async function PackPage() {
           </div>
         </section>
 
-        {/* Each objection sits where it forms, not in a FAQ at the bottom. */}
+        {/* Each objection sits where it forms, not in a FAQ at the bottom.
+            Full-bleed tint so the page changes ground under the reader rather
+            than running as one uninterrupted white column. */}
+        <div className="sf-bleed tint">
         <section className="sf-reveal sf-obj">
           <h2>Three things people say before they buy</h2>
 
@@ -237,9 +328,7 @@ export default async function PackPage() {
             </p>
           </div>
         </section>
-
-        <h2 className="sf-pksect">Exactly what is in it</h2>
-        <PackCarousel items={carousel} />
+        </div>
 
         <div className="sf-pktop solo">
           <div className="sf-pkthesis">
@@ -321,10 +410,12 @@ export default async function PackPage() {
           ))}
         </section>
 
+        <div className="sf-bleed ink">
         <section className="sf-reveal sf-pkrules">
           <h2>What is deliberately not in this box</h2>
           <div className="sf-pkrulegrid">
             <div>
+              <span className="sf-pkruleno" aria-hidden="true">FUEL</span>
               <h3>No stove, no fuel, no gas</h3>
               <p>
                 The ration needs no cooking, so the pack needs no stove, no fuel tablets, no canister
@@ -334,6 +425,7 @@ export default async function PackPage() {
               </p>
             </div>
             <div>
+              <span className="sf-pkruleno" aria-hidden="true">MEDS</span>
               <h3>No medicines</h3>
               <p>
                 Painkillers, rehydration salts and iodine tablets are medicinal products, and selling
@@ -342,6 +434,7 @@ export default async function PackPage() {
               </p>
             </div>
             <div>
+              <span className="sf-pkruleno" aria-hidden="true">TENT</span>
               <h3>No tent, no rucksack</h3>
               <p>
                 The official guidance is to stay in your home, not leave it. A grab bag is a different
@@ -350,6 +443,7 @@ export default async function PackPage() {
               </p>
             </div>
             <div>
+              <span className="sf-pkruleno" aria-hidden="true">GUESS</span>
               <h3>Nothing we have not checked</h3>
               <p>
                 Every line carries its rung on the evidence ladder. {s.researching} are still at
@@ -359,9 +453,11 @@ export default async function PackPage() {
             </div>
           </div>
         </section>
+        </div>
 
         <LeadCapture />
 
+        <div className="sf-bleed tint">
         <section className="sf-reveal sf-after">
           <h2>What happens after you order</h2>
           <p className="sf-pklede">
@@ -403,6 +499,7 @@ export default async function PackPage() {
             </li>
           </ol>
         </section>
+        </div>
 
         <section className="sf-pkinternal">
           <div className="sf-pkinthead">Internal · SC Desk · not customer-facing</div>

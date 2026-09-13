@@ -17,12 +17,19 @@ export default function PackBuy({
   price,
   currency,
   isPlaceholder,
+  variant = "full",
 }: {
   productId: string;
   price: number | null;
   currency: string;
   isPlaceholder: boolean;
+  /** "hero" is the same control above the fold: price, quantity, one button.
+      The assurances, the demo note and the links belong to the order block and
+      are not repeated — and the scroll-depth observer belongs to it too, or
+      "reached the order block" would fire on page load and mean nothing. */
+  variant?: "full" | "hero";
 }) {
+  const hero = variant === "hero";
   const router = useRouter();
   const { qty, setQty, numbers, people, touched, track } = useHousehold();
   const [busy, setBusy] = useState(false);
@@ -34,6 +41,7 @@ export default function PackBuy({
      observer rather than a scroll handler, so it costs nothing while idle. */
   useEffect(() => {
     const el = box.current;
+    if (hero) return;
     if (!el || typeof IntersectionObserver === "undefined") return;
     const io = new IntersectionObserver(
       (entries) => {
@@ -46,7 +54,7 @@ export default function PackBuy({
     );
     io.observe(el);
     return () => io.disconnect();
-  }, [track]);
+  }, [track, hero]);
 
   const money = (n: number) => `${currency === "GBP" ? "£" : "€"}${n.toFixed(2)}`;
 
@@ -81,7 +89,7 @@ export default function PackBuy({
   const short = covers < people;
 
   return (
-    <div className="sf-pkbuy" ref={box}>
+    <div className={`sf-pkbuy${hero ? " hero" : ""}`} ref={box}>
       <div className="sf-pkprice">
         <strong>{price === null ? "€ ——" : money(price * qty)}</strong>
         {isPlaceholder ? <span className="sf-pktest">Test price</span> : null}
@@ -125,13 +133,15 @@ export default function PackBuy({
 
       {msg ? <div className={`sf-pkmsg${err ? " bad" : ""}`}>{msg}</div> : null}
 
-      <ul className="sf-pkassure">
-        <li>Five-year shelf life</li>
-        <li>Ships as an ordinary parcel</li>
-        <li>Every item evidenced</li>
-      </ul>
+      {hero ? null : (
+        <ul className="sf-pkassure">
+          <li>Five-year shelf life</li>
+          <li>Ships as an ordinary parcel</li>
+          <li>Every item evidenced</li>
+        </ul>
+      )}
 
-      {isPlaceholder ? (
+      {isPlaceholder && !hero ? (
         <p className="sf-pkdemo">
           <strong>€149 is a test figure, not the price.</strong> The real number is not set: it waits
           on genuine trade terms across all twenty-one lines. Nothing here takes money — checkout
@@ -139,10 +149,16 @@ export default function PackBuy({
         </p>
       ) : null}
 
-      <div className="sf-pklinks">
-        <Link href="/admin/site/basket">View basket</Link>
-        <Link href="/admin/site/kit-builder">Check it against your household →</Link>
-      </div>
+      {hero ? (
+        <a className="sf-pkherojump" href="#whats-in-it">
+          See every item in the box ↓
+        </a>
+      ) : (
+        <div className="sf-pklinks">
+          <Link href="/admin/site/basket">View basket</Link>
+          <Link href="/admin/site/kit-builder">Check it against your household →</Link>
+        </div>
+      )}
     </div>
   );
 }
