@@ -171,16 +171,7 @@ const SF_TABS = [
 export function SfNav({ basketCount = 0 }: { basketCount?: number }) {
   const path = usePathname() || "/admin";
   return (
-    <nav className="sf-nav" aria-label="Storefront preview pages">
-      <span
-        className="sf-navlabel"
-        title="Pages on this row are built behind the gate and will become the public site at launch."
-      >
-        STOREFRONT — PREVIEW · NOT PUBLIC
-        <span className="info" aria-hidden="true">
-          ⓘ
-        </span>
-      </span>
+    <nav className="sf-nav" aria-label="Storefront">
       {SF_TABS.map((t) => (
         <Link
           key={t.href}
