@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getPack, PACK_HOURS, PACK_PEOPLE, type CoverageRow, type PackLine } from "@/lib/pack";
 import PackBuy from "./pack-buy";
+import PackCarousel, { type CarouselItem } from "./pack-carousel";
 
 export const dynamic = "force-dynamic";
 
@@ -99,6 +100,21 @@ export default async function PackPage() {
   const p = data.product;
   const s = data.stats;
   const hoursRow = data.coverage.filter((c) => c.hours !== null);
+
+  /* Filled lines first, in manifest order, then the empty slots. The empty ones
+     are shown rather than dropped — same call the manifest makes. */
+  const carousel: CarouselItem[] = [
+    ...data.lines.filter((l) => l.product),
+    ...data.lines.filter((l) => !l.product),
+  ].map((l) => ({
+    key: l.id,
+    name: l.product?.name || l.unfilledLabel || l.slot,
+    qty: l.qty,
+    image: l.product?.image ?? null,
+    slug: l.product?.slug ?? null,
+    status: l.product?.status ?? null,
+    filled: Boolean(l.product),
+  }));
   const weightKg = s.totalWeightGrams ? (s.totalWeightGrams / 1000).toFixed(2) : null;
 
   return (
@@ -119,6 +135,8 @@ export default async function PackPage() {
       </header>
 
       <div className="sf-catwrap">
+        <PackCarousel items={carousel} />
+
         <div className="sf-pktop">
           <div className="sf-pkthesis">
             <h2>What it actually covers, hour by hour</h2>

@@ -6327,3 +6327,76 @@ a.sf-live-chip { text-decoration: none; }
 .sf-pkintlist code { background: var(--sc-surface-3); padding: 1px 5px; border-radius: 4px; font-size: 11.5px; margin-right: 4px; }
 .sf-pkprov { font-size: 11.5px; color: var(--sc-fg-4); line-height: 1.7; max-width: 84ch; }
 .sf-pkprov code { background: var(--sc-surface-3); padding: 1px 5px; border-radius: 4px; }
+
+/* ---------- the pack carousel ----------
+   Native scroll-snap rather than a carousel library: it swipes correctly on a
+   phone, honours reduced-motion for free, and the strip is already usable if
+   the arrows never hydrate. */
+.sf-pkcar { margin: 4px 0 34px; }
+.sf-pkcarhead {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap; margin-bottom: 14px;
+}
+.sf-pkcarhead h2 {
+  margin: 0; font-size: 25px; color: var(--sc-fg); font-weight: 600; letter-spacing: -.01em;
+}
+.sf-pkcarnav { display: flex; align-items: center; gap: 8px; }
+.sf-pkcarcount { font-size: 12px; color: var(--sc-fg-4); margin-right: 4px; }
+.sf-pkcarnav button {
+  width: 34px; height: 34px; border-radius: 50%; cursor: pointer;
+  border: 1px solid var(--sc-line); background: var(--sc-surface);
+  color: var(--sc-fg-2); font-size: 19px; line-height: 1;
+  box-shadow: var(--sf-lift-1);
+}
+.sf-pkcarnav button:hover:not(:disabled) { background: var(--sc-surface-2); }
+.sf-pkcarnav button:disabled { opacity: .32; cursor: default; box-shadow: none; }
+
+.sf-pkcarrail {
+  display: flex; gap: 14px;
+  overflow-x: auto; scroll-snap-type: x mandatory;
+  scroll-padding-left: 2px; padding: 4px 2px 12px;
+  scrollbar-width: thin;
+  /* The page sets overflow-x: clip for the full-bleed band; this is its own
+     scroll container and is unaffected by that. */
+}
+.sf-pkcarrail:focus-visible { outline: 2px solid var(--sc-brass-line); outline-offset: 3px; border-radius: var(--sf-radius); }
+
+.sf-pkcartile {
+  flex: 0 0 174px; scroll-snap-align: start;
+  background: var(--sc-surface); border-radius: var(--sf-radius);
+  box-shadow: var(--sf-lift-1); padding: 10px 10px 13px;
+  text-decoration: none; color: inherit;
+  transition: box-shadow .18s ease, transform .18s ease;
+}
+a.sf-pkcartile:hover { box-shadow: var(--sf-lift-2); transform: translateY(-2px); }
+@media (max-width: 560px) { .sf-pkcartile { flex-basis: 148px; } }
+
+.sf-pkcarimg {
+  position: relative; aspect-ratio: 4 / 3; border-radius: var(--sf-radius-s);
+  background: var(--sc-surface-2); overflow: hidden;
+  display: flex; align-items: center; justify-content: center; margin-bottom: 9px;
+}
+.sf-pkcarimg img { width: 100%; height: 100%; object-fit: contain; padding: 6px; }
+.sf-pkcarempty { color: var(--sc-fg-5); font-size: 24px; }
+.sf-pkcarqty {
+  position: absolute; top: 6px; left: 6px;
+  padding: 2px 7px; border-radius: 20px;
+  background: var(--sc-brass); color: #16130c;
+  font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums;
+}
+.sf-pkcarname {
+  font-size: 12.5px; line-height: 1.4; color: var(--sc-fg-2);
+  /* Two lines, then ellipsis — a ragged rail of different-height tiles reads
+     as broken, and the full name is one tap away on the product page. */
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* An unfilled slot is drawn as a decision, not as an image that failed. */
+.sf-pkcartile.empty { background: transparent; box-shadow: none; border: 1px dashed var(--sc-line-strong); }
+.sf-pkcartile.empty .sf-pkcarimg { background: transparent; border: 1px dashed var(--sc-line); }
+.sf-pkcartile.empty .sf-pkcarname { color: var(--sc-fg-4); }
+.sf-pkcarslot {
+  margin-top: 4px; font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--sc-bad); font-weight: 700;
+}
