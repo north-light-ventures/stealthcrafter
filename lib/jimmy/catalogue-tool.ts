@@ -47,7 +47,7 @@ const FIELDS =
   "id,slug,sc_product_name,product_name,brand,category_id,subcategory,selling_price," +
   "currency,product_status,research_stage,hero_product,super_hero,ce_certified," +
   "dangerous_goods,eu_sourcing,description,people_capacity,weight_grams,season_rating," +
-  "packed_size,attributes_source,image_urls";
+  "packed_size,attributes_source,image_urls,search_keywords";
 
 export type CatalogueHit = {
   /** the product row's own id — carried so an offer made this turn can be
@@ -328,10 +328,15 @@ function scoreRow(p: any, cats: Record<number, string>, tokens: string[]): numbe
   const cat = normaliseText(cats[p.category_id] || "");
   const sub = normaliseText(p.subcategory || "");
   const desc = normaliseText(p.description || "");
+  /* Keywords were being selected and never read. They are the only field that
+     carries the words a customer actually uses — "notvorrat", "blackout",
+     "power cut" — none of which appear in any product name. */
+  const kw = normaliseText(p.search_keywords || "");
   let score = 0;
   for (const t of tokens) {
     if (name.includes(t)) score += 5;
     if (brand.includes(t)) score += 4;
+    if (kw.includes(t)) score += 3;
     if (cat.includes(t)) score += 3;
     if (sub.includes(t)) score += 2;
     if (desc.includes(t)) score += 1;

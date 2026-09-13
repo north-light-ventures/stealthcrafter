@@ -154,6 +154,9 @@ export function CcNav() {
 /* ------------------------------------------------------------------ */
 const SF_TABS = [
   { href: "/admin/site/home", label: "Home" },
+  // The one product we launch with sits second, right after Home. It is not a
+  // catalogue entry among 1,173 others any more — it is the shop.
+  { href: "/admin/site/pack", label: "The 72-Hour Pack" },
   { href: "/admin/site/jimmy", label: "Jimmy" },
   { href: "/admin/site/guides", label: "Guides" },
   { href: "/admin/site/catalogue", label: "Catalogue" },
