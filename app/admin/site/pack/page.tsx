@@ -2,6 +2,11 @@ import Link from "next/link";
 import { getPack, PACK_HOURS, PACK_PEOPLE, type CoverageRow, type PackLine } from "@/lib/pack";
 import PackBuy from "./pack-buy";
 import PackCarousel, { type CarouselItem } from "./pack-carousel";
+import { HouseholdProvider } from "./household-context";
+import HouseholdSelector from "./household-selector";
+import CountryBlock from "./country-block";
+import LeadCapture from "./lead-capture";
+import { getFunnelData } from "@/lib/pack-funnel";
 
 export const dynamic = "force-dynamic";
 
@@ -82,7 +87,7 @@ function CoverageBar({ row }: { row: CoverageRow }) {
 }
 
 export default async function PackPage() {
-  const data = await getPack();
+  const [data, funnel] = await Promise.all([getPack(), getFunnelData()]);
 
   if (!data.configured || !data.product) {
     return (
@@ -118,26 +123,120 @@ export default async function PackPage() {
   const weightKg = s.totalWeightGrams ? (s.totalWeightGrams / 1000).toFixed(2) : null;
 
   return (
+    <HouseholdProvider countries={funnel.countries}>
     <main className="sf-page banded">
+      {funnel.totalActive > 0 ? (
+        <div className="sf-livebar">
+          <strong>{funnel.totalActive.toLocaleString("en-GB")}</strong> public-safety warnings active
+          across {funnel.countriesWithAlerts} European countries right now — counted from our own
+          feeds, not an estimate.
+        </div>
+      ) : null}
+
       <header className="sf-band">
         <div className="sf-bandin">
-          <div className="sf-bandkicker">One product · Shelter-in-place · Two people</div>
-          <h1 className="wide">The 72-Hour Pack</h1>
-          <p className="sf-bandlede">{p.description}</p>
-          <div className="sf-bandstats">
-            <div className="sf-bandstat"><b>{PACK_HOURS} h</b><span>duration</span></div>
-            <div className="sf-bandstat"><b>{PACK_PEOPLE} people</b><span>household</span></div>
-            <div className="sf-bandstat"><b>{s.filled} / {s.slots}</b><span>lines filled</span></div>
-            <div className="sf-bandstat"><b>{s.approved}</b><span>approved</span></div>
-            {weightKg ? <div className="sf-bandstat"><b>{weightKg} kg</b><span>weighed so far</span></div> : null}
-          </div>
+          <div className="sf-bandkicker">One pack · Shelter in place · Three days</div>
+          <h1 className="wide">When the power goes, you have about a day.</h1>
+          <p className="sf-bandlede">
+            Not because anything dramatic happens. Because the water in your cupboard runs out, the
+            shops shut, and the card machines stop. Every civil-protection agency in Europe tells
+            households to cover seventy-two hours on their own. Almost nobody does.
+          </p>
         </div>
       </header>
 
       <div className="sf-catwrap">
+        {/* THE SELECTOR IS THE CONVERSION MECHANISM and it sits above the fold.
+            Everything below it is personalised by what it says, including the
+            quantity that reaches the real basket. */}
+        <HouseholdSelector />
+
+        <CountryBlock feedCount={funnel.feedCount} />
+
+        <section className="sf-orderblock">
+          <div className="sf-orderin">
+            <h2>Order it</h2>
+            <PackBuy
+              productId={p.id}
+              price={p.selling}
+              currency="EUR"
+              isPlaceholder={data.priceIsPlaceholder}
+            />
+          </div>
+        </section>
+
+        {/* Each objection sits where it forms, not in a FAQ at the bottom. */}
+        <section className="sf-obj">
+          <h2>Three things people say before they buy</h2>
+
+          <div className="sf-objitem">
+            <h3>&ldquo;I could just buy this myself, cheaper.&rdquo;</h3>
+            <p>
+              You could buy something cheaper. You would be buying supermarket food with a
+              twelve-month date on it, a torch chosen by price, and water you rotate every six months
+              and eventually stop rotating. That is the kit that quietly stops being a kit.
+            </p>
+            <p>
+              What is in this box was chosen against one question — does it still work in three years,
+              in the dark, when nobody is thinking clearly. The rations are made for liferafts and
+              last five years. The radio has no battery to go flat. That is the difference you are
+              paying for, and it is the only difference worth paying for.
+            </p>
+            <div className="sf-objcmp">
+              <div>
+                <span>Assembling it yourself</span>
+                <strong>{s.tradeCostLines >= 10 ? "11 suppliers" : `${s.filled} lines`}</strong>
+                <em>Six deliveries, two shops, and an afternoon comparing tourniquets you will never use.</em>
+              </div>
+              <div>
+                <span>Replacement cycle</span>
+                <strong>Every 12 months</strong>
+                <em>Supermarket food and water need rotating yearly. Most people manage it twice.</em>
+              </div>
+              <div className="win">
+                <span>This pack</span>
+                <strong>Once, for 5 years</strong>
+                <em>One order. One box. One reminder from us before anything expires.</em>
+              </div>
+            </div>
+          </div>
+
+          <div className="sf-objitem">
+            <h3>&ldquo;I&rsquo;ll sort it later.&rdquo;</h3>
+            <p>
+              This is the honest one, and it is the reason most households have nothing. Nobody buys
+              this on the day they need it, because on that day the shops are already empty — that is
+              what a warning does to a supermarket.
+            </p>
+            <p>
+              So here is the only argument we think is fair. Everything in this box has a five-year
+              life. Buying it today rather than next spring costs you nothing at all except the money,
+              and it is the difference between being covered for the next sixty months and being
+              covered for none of them. <strong>There is no sale, no countdown, and no reason to rush
+              other than that one.</strong>
+            </p>
+          </div>
+
+          <div className="sf-objitem">
+            <h3>&ldquo;Why should I trust you?&rdquo;</h3>
+            <p>
+              Because we publish what we have not verified. Below you will find{" "}
+              {s.unfilled} slots in this pack that are still empty, {data.blockers.length} items
+              flagged as unresolved, and a note that our own catalogue currently contradicts itself
+              about a box of matches.
+            </p>
+            <p>
+              No other preparedness retailer shows you that, and it is not modesty — it is the whole
+              product. Anyone can put things in a box. What we sell is knowing which things, and being
+              willing to tell you what we do not yet know.
+            </p>
+          </div>
+        </section>
+
+        <h2 className="sf-pksect">Exactly what is in it</h2>
         <PackCarousel items={carousel} />
 
-        <div className="sf-pktop">
+        <div className="sf-pktop solo">
           <div className="sf-pkthesis">
             <h2>What it actually covers, hour by hour</h2>
             <p className="sf-pklede">
@@ -147,12 +246,6 @@ export default async function PackPage() {
               could be put on the clock today.
             </p>
           </div>
-          <PackBuy
-            productId={p.id}
-            price={p.selling}
-            currency="EUR"
-            isPlaceholder={data.priceIsPlaceholder}
-          />
         </div>
 
         <section className="sf-pkcovgrid">
@@ -258,6 +351,50 @@ export default async function PackPage() {
           </div>
         </section>
 
+        <LeadCapture />
+
+        <section className="sf-after">
+          <h2>What happens after you order</h2>
+          <p className="sf-pklede">
+            A box you buy once and forget is a box that fails. This is the part that stops that —
+            designed, and honest about which pieces are not built yet.
+          </p>
+          <ol className="sf-aftersteps">
+            <li>
+              <span className="when">Immediately</span>
+              <strong>Register the pack</strong>
+              <p>
+                It lands in your account with every item, its batch and its expiry. You can print the
+                manifest and tape it inside the lid.
+              </p>
+            </li>
+            <li>
+              <span className="when">Ongoing</span>
+              <strong>We watch your region</strong>
+              <p>
+                The same {funnel.feedCount} official feeds behind this page. You hear when it matters,
+                not when we want a sale.
+              </p>
+            </li>
+            <li>
+              <span className="when">Year four</span>
+              <strong>We tell you what expires</strong>
+              <p>
+                Before anything goes out of date, not after. Replace the consumables, keep the
+                equipment. <em>Needs email, which is not connected yet.</em>
+              </p>
+            </li>
+            <li>
+              <span className="when">Whenever you like</span>
+              <strong>Close the next gap</strong>
+              <p>
+                Tell us your home has changed — a baby, a dog, a relative who cannot manage stairs —
+                and we tell you the one thing worth adding next.
+              </p>
+            </li>
+          </ol>
+        </section>
+
         <section className="sf-pkinternal">
           <div className="sf-pkinthead">Internal · SC Desk · not customer-facing</div>
           <h2>Where this stands</h2>
@@ -324,6 +461,15 @@ export default async function PackPage() {
             )}
           </ul>
 
+          <h3>Funnel</h3>
+          <p className="sf-pkintnote">
+            Four events are recorded and no more — selector interaction, scroll to the order block,
+            add to basket, email capture — and a fifth needs a database migration, which is the point.
+            Three stubs sit behind this page and all three are stated on it rather than hidden: the
+            price is a test figure, payment is the demo provider, and transactional email does not
+            exist, so the capture form stores consent and sends nothing.
+          </p>
+
           <p className="sf-pkintnote">
             Under GPSR 2023/988, assembling and selling this box makes us its manufacturer —
             responsible economic operator, technical file, traceability — not a reseller of its parts.
@@ -339,5 +485,6 @@ export default async function PackPage() {
         </p>
       </div>
     </main>
+    </HouseholdProvider>
   );
 }

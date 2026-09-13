@@ -531,6 +531,21 @@ export function formatCatalogueBlock(result: CatalogueResult, carried: Catalogue
       "\n";
   }
 
+  /* ONE PRODUCT NOW, SO THE ANSWER IS A QUANTITY.
+     StealthCrafter launches with a single pack sized for two people; households
+     scale it by buying more than one. Where the pack is on the table and we know
+     the household, the arithmetic is handed over rather than left to the model —
+     "you are four people, that is two packs" is a calculation, not a judgement. */
+  const pack = hits.find((h) => h.slug === "72-hour-pack");
+  if (pack && household) {
+    const packs = Math.ceil(household.people / 2);
+    out +=
+      `\nQUANTITY FOR THIS HOUSEHOLD: ${household.people} ` +
+      `${household.people === 1 ? "person" : "people"} ÷ 2 per pack = ${packs} ` +
+      `${packs === 1 ? "pack" : "packs"}. Recommend the QUANTITY, not a different product — ` +
+      `there is one pack and households scale it by buying more than one. Say the number.\n`;
+  }
+
   if (household) {
     out +=
       `\nWHO THEY ARE BUYING FOR: ${household.people} ` +
