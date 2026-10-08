@@ -100,6 +100,14 @@ type Props = {
   market: string | null;
   generatedAt: string;
   dash: HomeDashboard;
+  /** PUBLIC MODE. The same map, the same page, on the public site.
+      What it takes out is only what cannot legally or sensibly be there:
+      Jimmy (zero of 24 knowledge chunks are signed), and every rail and
+      link that lands behind the founder gate — a public visitor following
+      one would be bounced to /login, which is worse than not offering it.
+      The map, the live list, the filters, the country picker and the
+      legend are untouched, because they ARE the page. */
+  publicMode?: boolean;
 };
 
 /* ------------------------------------------------------------------ */
@@ -322,6 +330,7 @@ export default function LiveEurope({
   market,
   generatedAt,
   dash,
+  publicMode = false,
 }: Props) {
   const router = useRouter();
   const holder = useRef<HTMLDivElement | null>(null);
@@ -926,7 +935,11 @@ export default function LiveEurope({
         {country && (
           <>
             <Link
-              href={`/admin/site/conditions/${country.toLowerCase()}`}
+              href={
+                publicMode
+                  ? `/countries#${country}`
+                  : `/admin/site/conditions/${country.toLowerCase()}`
+              }
               className="sf-live-chip on"
               title={`Everything we watch in ${countryName(country)}, and what we cannot`}
             >
@@ -945,9 +958,15 @@ export default function LiveEurope({
             setSelected(null);
           }}
         />
-        <Link href="/admin/site/catalogue" className="sf-live-cta">
-          Browse equipment
-        </Link>
+        {publicMode ? (
+          <Link href="/countries" className="sf-live-cta">
+            Every country
+          </Link>
+        ) : (
+          <Link href="/admin/site/catalogue" className="sf-live-cta">
+            Browse equipment
+          </Link>
+        )}
       </header>
 
       {/* ---------------- left: conditions ---------------- */}
@@ -1048,17 +1067,19 @@ export default function LiveEurope({
               ))}
             </div>
             <div className="sf-live-actions">
-              <button
-                type="button"
-                className="sf-live-ask"
-                onClick={() =>
-                  askJimmy(
-                    `There is a ${featured.kind} event — ${featured.title}. What should my household do to be ready for something like this?`
-                  )
-                }
-              >
-                Ask Jimmy what this means for us →
-              </button>
+              {publicMode ? null : (
+                <button
+                  type="button"
+                  className="sf-live-ask"
+                  onClick={() =>
+                    askJimmy(
+                      `There is a ${featured.kind} event — ${featured.title}. What should my household do to be ready for something like this?`
+                    )
+                  }
+                >
+                  Ask Jimmy what this means for us →
+                </button>
+              )}
               <button type="button" className="sf-live-ghost" onClick={() => setSelected(featured.id)}>
                 Show on map
               </button>
@@ -1121,7 +1142,12 @@ export default function LiveEurope({
         </ul>
       </aside>
 
-      {/* ---------------- right: Jimmy + the rest of the site ---------------- */}
+      {/* ---------------- right: Jimmy + the rest of the site ----------------
+           Every item behind this rail — Jimmy, the guides, the tested
+           reports, the gear — lives under /admin and is gated. On the
+           public site the whole rail is removed rather than offered and
+           then refused at /login. */}
+      {publicMode ? null : (
       <button
         type="button"
         className="sf-live-tab r"
@@ -1131,7 +1157,9 @@ export default function LiveEurope({
         {rightOpen ? "›" : "‹"}
         <span>Your readiness</span>
       </button>
+      )}
 
+      {publicMode ? null : (
       <aside className="sf-live-right" aria-label="Jimmy and knowledge">
         <nav className="sf-live-tabs">
           {(
@@ -1224,6 +1252,7 @@ export default function LiveEurope({
           )}
         </div>
       </aside>
+      )}
 
       {/* ---------------- map controls ---------------- */}
       <div className="sf-live-controls" role="group" aria-label="Map controls">
