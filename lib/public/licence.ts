@@ -110,3 +110,37 @@ export function canRenderMeteoalarm(ctx: MeteoalarmContext): boolean {
 export function isMeteoalarm(f: { id: string; authority: string }): boolean {
   return /meteoalarm|eumetnet/i.test(f.id) || /meteoalarm|eumetnet/i.test(f.authority);
 }
+
+/* ---------------- the legacy adapters ----------------
+   Five pan-European sources predate the ingest spine and identify themselves
+   by NAME ("EFFIS", "GDACS") rather than by a feeds row id. Their events
+   therefore carry feedId = "EFFIS", and a gate that only matches row ids
+   silently drops every one of them.
+
+   That is exactly what shipped: the public home filtered events by row id,
+   left the SOURCE list unfiltered, and the page showed "Wildfires 200" in a
+   filter chip above a list reading "0 conditions". A page whose entire claim
+   is that its numbers are real cannot contradict itself in two places on the
+   same screen.
+
+   Each adapter maps to the feeds row that carries its licence, so one table
+   decides both. EMSC's row is 'blocked' and now disabled, so EMSC does not
+   reach a public page — which is the correct outcome and the reason the map
+   exists rather than a hard-coded allow-list. */
+export const LEGACY_SOURCE_FEED: Record<string, string> = {
+  EFFIS: "eu:wildfire:effis-gwis-wms",
+  GDACS: "eu:civil-protection:gdacs",
+  EMSC: "eu:seismic:emsc-fdsn-event-web-service",
+  ENTSOE: "eu:power:entso-e-transparency-platform-rest-api",
+  TRANSPORT: "eu:roads:eu-national-access-points-nap-index-datex-ii",
+};
+
+/** Every identifier allowed on a public page: cleared feed row ids, plus the
+    legacy source names whose own row is cleared. */
+export function publicIdentifiers(cleared: PublicFeed[]): Set<string> {
+  const ids = new Set(cleared.map((f) => f.id));
+  for (const [name, feedId] of Object.entries(LEGACY_SOURCE_FEED)) {
+    if (ids.has(feedId)) ids.add(name);
+  }
+  return ids;
+}

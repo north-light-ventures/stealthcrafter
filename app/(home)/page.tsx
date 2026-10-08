@@ -3,7 +3,7 @@ import { getEuroGeo } from "@/lib/euro-geo";
 import { getLiveSnapshot } from "@/lib/live-conditions";
 import { getHomeDashboard } from "@/lib/home-dashboard";
 import { getMarket } from "@/lib/market-server";
-import { publicFeeds } from "@/lib/public/licence";
+import { publicFeeds, publicIdentifiers } from "@/lib/public/licence";
 import LiveEurope from "@/app/admin/site/home/live-europe";
 
 export const dynamic = "force-dynamic";
@@ -50,14 +50,14 @@ export default async function HomePage() {
     publicFeeds(),
   ]);
 
-  /* THE GATE. Matched on feedId, which every LiveEvent carries, so a feed
-     whose permission has not arrived cannot reach a public page by being
-     merged in from somewhere else. The five original pan-European adapters
-     identify themselves by source name rather than a feeds row id, so they
-     are matched on both. */
-  const clearedIds = new Set(cleared.map((f) => f.id));
-  const events = snapshot.events.filter((e) => clearedIds.has(e.feedId));
-  const feeds = snapshot.feeds.filter((f: any) => clearedIds.has(f.id));
+  /* THE GATE. One set of allowed identifiers — cleared feed row ids plus the
+     legacy adapters whose own row is cleared — applied to EVERY list the page
+     renders. Filtering the events but not the source chips is what produced
+     "Wildfires 200" above "0 conditions" on the first deploy of this page. */
+  const allowed = publicIdentifiers(cleared);
+  const events = snapshot.events.filter((e) => allowed.has(e.feedId));
+  const feeds = snapshot.feeds.filter((f: any) => allowed.has(f.id));
+  const sources = snapshot.sources.filter((s: any) => allowed.has(s.source));
 
   return (
     <LiveEurope
@@ -65,7 +65,7 @@ export default async function HomePage() {
       geo={geo.fc}
       bounds={geo.bounds}
       events={events}
-      sources={snapshot.sources}
+      sources={sources}
       feeds={feeds}
       credits={snapshot.credits}
       market={market?.iso2 ?? null}
