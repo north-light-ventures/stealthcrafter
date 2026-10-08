@@ -23,7 +23,7 @@ export const dynamic = "force-dynamic";
    cannot encode its most important field in hue. */
 const RUNG: Record<string, { glyph: string; label: string; cls: string }> = {
   approved: { glyph: "●", label: "Approved", cls: "ap" },
-  researching: { glyph: "◐", label: "Researching", cls: "re" },
+  researching: { glyph: "\u25C6", label: "Researching", cls: "re" },
   draft: { glyph: "○", label: "Draft", cls: "dr" },
   rejected: { glyph: "✕", label: "Rejected", cls: "rj" },
 };
