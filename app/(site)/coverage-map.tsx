@@ -95,6 +95,7 @@ export default function CoverageMap({ fc, fill, legend }: Props) {
   useEffect(() => {
     if (!host.current || map.current) return;
     let dead = false;
+    let ro: ResizeObserver | null = null;
 
     (async () => {
       try {
@@ -250,6 +251,19 @@ export default function CoverageMap({ fc, fill, legend }: Props) {
         });
 
         m.on("error", () => setFailed(true));
+
+        /* MapLibre measures its container once, at construction. The container
+           here is sized by `aspect-ratio` inside a CSS grid, so on a slower
+           first paint — fonts still loading, grid not yet resolved — the map
+           latches onto a stale box and draws Europe in a corner of it. That is
+           exactly what production did while the sandbox, with a different
+           timing, looked fine. A ResizeObserver is the fix that does not
+           depend on guessing when layout settles: whenever the box changes,
+           including the moment it first gets its real height, the map is told. */
+        if (typeof ResizeObserver !== "undefined" && host.current) {
+          ro = new ResizeObserver(() => map.current?.resize());
+          ro.observe(host.current);
+        }
       } catch {
         // A WebGL-less browser, a blocked worker, anything: the table below is
         // the real content and the page must not lose its headline because a
@@ -260,6 +274,8 @@ export default function CoverageMap({ fc, fill, legend }: Props) {
 
     return () => {
       dead = true;
+      ro?.disconnect();
+      ro = null;
       map.current?.remove();
       map.current = null;
     };
