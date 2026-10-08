@@ -89,7 +89,7 @@ export default async function CountriesPage() {
         </div>
 
         {rows.map((r) => (
-          <article className={`pb-crow st-${r.state}`} key={r.iso2}>
+          <article className={`pb-crow st-${r.state}`} key={r.iso2} id={r.iso2}>
             <h2 className="pb-cname">
               <span className="pb-ciso" aria-hidden="true">
                 {r.iso2}

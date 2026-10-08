@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getRegister } from "@/lib/public/data";
+import { getPublicMap, STATE_FILL } from "@/lib/public/map";
+import { COVERAGE_GLYPH, COVERAGE_WORD, type CoverageState } from "@/lib/public/register";
 import { publicFeeds } from "@/lib/public/licence";
 import CountryPicker from "./country-picker";
+import CoverageMap from "./coverage-map";
 
 export const dynamic = "force-dynamic";
 
@@ -23,8 +26,22 @@ export const metadata: Metadata = {
  * which is the argument for computing it.
  */
 export default async function HomePage() {
-  const [{ rows, totals }, cleared] = await Promise.all([getRegister(), publicFeeds()]);
+  const [{ rows, totals }, cleared, mapData] = await Promise.all([
+    getRegister(),
+    publicFeeds(),
+    getPublicMap(),
+  ]);
   const countries = rows.map((r) => ({ iso2: r.iso2, name: r.name }));
+
+  /* Counted on the server so the legend and the map cannot disagree, and so
+     the client is handed numbers rather than the job of deriving them. */
+  const ORDER: CoverageState[] = ["reporting", "built-not-on", "not-machine-readable", "nothing-found"];
+  const legend = ORDER.map((state) => ({
+    state,
+    glyph: COVERAGE_GLYPH[state],
+    word: COVERAGE_WORD[state],
+    count: rows.filter((r) => r.state === state).length,
+  }));
 
   return (
     <div className="pb-page pb-home">
@@ -56,6 +73,16 @@ export default async function HomePage() {
             </p>
           </aside>
         </div>
+      </section>
+
+      {/* THE MAP IS THE ARGUMENT, DRAWN — and it gets the width to make it.
+          Every country in the register, filled by whether anyone outside that
+          government can read its civil-protection feed, from our own outlines
+          and our own research. There is no third-party tile request on this
+          page: see lib/public/map.ts for why the gated home's satellite
+          basemap does not come with us. */}
+      <section className="pb-mapsec" aria-label="Coverage across Europe">
+        <CoverageMap fc={mapData.fc} fill={STATE_FILL} legend={legend} />
       </section>
 
       <section className="pb-three">
